@@ -5,34 +5,39 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.Buffer;
+import java.nio.channels.NonWritableChannelException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.transform.Templates;
 
+import Data.Edge;
 import Data.Graph;
 import Data.Point;
 
 /**
  * @author zhr
  * @version 1.0.0
- * @date 2016Äê3ÔÂ4ÈÕ
+ * @date 2016ï¿½ï¿½3ï¿½ï¿½4ï¿½ï¿½
  * @description
  */
 public class Main {
 	public static void main(String[] args)
 	{
+		Main main = new Main();
+		
 		Frame frame = new Frame("graph");
 		frame.setSize(400, 400);
 		frame.setLocation(100, 100);
 		frame.setVisible(true);
-
-
+	
+		
+		Graph graph = main.fileToGraph("graph");
 		
 	}
 	
 	
-	public Graph FileToGraph(String path)
+	public Graph fileToGraph(String path)
 	{
 		Graph graph = new Graph();
 		Map<Integer, Point> map = new HashMap<Integer, Point>();
@@ -53,6 +58,20 @@ public class Main {
 						int pointr = Integer.valueOf(vertex[1]);
 						Point pointL = map.get(pointl);
 						Point pointR = map.get(pointr);
+						if(pointL == null)
+						{
+							pointL = new Point(pointl);
+							graph.points.add(pointL);
+						}
+						if(pointR == null)
+						{
+							pointR = new Point(pointr);
+							graph.points.add(pointR);
+						}
+						Edge edge = new Edge();
+						edge.u = pointL;
+						edge.v = pointR;
+						graph.edges.add(edge);
 					}
 				}
 			}
@@ -75,6 +94,7 @@ public class Main {
 				}
 			}
 		}
+		graph.init();
 		return graph;
 	}
 }

@@ -2,10 +2,10 @@ package Data;
 /**
  * @author zhr
  * @version 1.0.0
- * @date 2016Äê3ÔÂ4ÈÕ
+ * @date 2016ï¿½ï¿½3ï¿½ï¿½4ï¿½ï¿½
  * @description
  */
 public class Edge {
-	Point u;
-	Point v;
+	public Point u;
+	public Point v;
 }
