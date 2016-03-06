@@ -4,12 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.Buffer;
-import java.nio.channels.NonWritableChannelException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
-import javax.xml.transform.Templates;
 
 import Data.Edge;
 import Data.Graph;
@@ -33,7 +31,8 @@ public class Main {
 	
 		
 		Graph graph = main.fileToGraph("graph");
-		
+
+			
 	}
 	
 	
