@@ -17,9 +17,12 @@ public class FR {
 	public double t;
 	//迭代次数
 	public int iterations;
-	
+	//总偏移量阈值
+	public double offsetValue;
 	//节点移动量
-	public double offset;
+	public double offset = Double.MAX_VALUE;
+	//上次节点移动量
+	public double pre_offset;
 	
 	public Graph graph;
 	
@@ -31,6 +34,7 @@ public class FR {
 		k = Math.sqrt(width * height / graph.points.size());
 		System.out.println("best distance:" + k);
 		t = width / 10;
+		offsetValue = k * 0.001 * graph.points.size();
 		initGraph();
 	}
 	
@@ -83,6 +87,15 @@ public class FR {
 		}
 	}
 	
+	public void infLayout()
+	{
+		for(;;)
+		{
+			if(offset < offsetValue)
+				break;
+			calculate();
+		}
+	}
 	
 	//每次迭代的工作
 	public void calculate()
@@ -121,16 +134,28 @@ public class FR {
 		for(int i = 0;i < graph.points.size();i++)
 		{
 			Point v = graph.points.get(i);
+			Vector vector = new Vector();
+			vector.x = v.pos.x;
+			vector.y = v.pos.y;
 			double length = v.disp.length();
-			offset += length;
-			v.disp.x = v.disp.x / length * Math.min(length, t);
-			v.disp.y = v.disp.y / length * Math.min(length, t);
+//			v.disp.x = v.disp.x / length * Math.min(length, t);
+//			v.disp.y = v.disp.y / length * Math.min(length, t);
+
 			v.pos.x = v.pos.x + v.disp.x;
 			v.pos.y = v.pos.y + v.disp.y;
 			v.pos.x = Math.min(width / 2, Math.max(- width / 2, v.pos.x));
 			v.pos.y = Math.min(height / 2, Math.max(- height / 2, v.pos.y));
+			vector.x = v.pos.x - vector.x;
+			vector.y = v.pos.y - vector.y;
+			//实际移动量
+			offset += vector.length();
 		}
+		
 		System.out.println("节点移动量" + offset);
-		t = 0.95 * t;
+//		if(offset > pre_offset)
+//			t = 0.99 * t;
+
+		pre_offset = offset;
+			
 	}
 }
