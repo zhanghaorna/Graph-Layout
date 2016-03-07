@@ -8,10 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import javax.swing.JFrame;
 
 import Data.Edge;
 import Data.Graph;
 import Data.Point;
+import Draw.DrawComponent;
+import Draw.GraphFrame;
 
 /**
  * @author zhr
@@ -20,18 +23,44 @@ import Data.Point;
  * @description
  */
 public class Main {
+	
+	
+	
 	public static void main(String[] args)
 	{
 		Main main = new Main();
 		
-		Frame frame = new Frame("graph");
-		frame.setSize(400, 400);
-		frame.setLocation(100, 100);
-		frame.setVisible(true);
-	
+
+		
 		
 		Graph graph = main.fileToGraph("graph");
-
+		System.out.println("points:" + graph.points.size());
+		FR fr = new FR(graph, 400, 400);
+//		fr.initLayout(300);
+		for(int i = 0;i < graph.points.size();i++)
+		{
+			Point point = graph.points.get(i);
+			System.out.println("x:" + point.pos.x + " y:" + point.pos.y);
+		}
+		
+		GraphFrame frame = new GraphFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
+		
+		for(int i = 0;i < 100;i++)
+		{
+			fr.calculate();
+			frame.setGraph(graph);
+			
+			try 
+			{
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 			
 	}
 	
@@ -61,11 +90,13 @@ public class Main {
 						{
 							pointL = new Point(pointl);
 							graph.points.add(pointL);
+							map.put(pointl, pointL);
 						}
 						if(pointR == null)
 						{
 							pointR = new Point(pointr);
 							graph.points.add(pointR);
+							map.put(pointr, pointR);
 						}
 						Edge edge = new Edge();
 						edge.u = pointL;
