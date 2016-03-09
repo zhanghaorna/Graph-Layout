@@ -46,22 +46,23 @@ public class Main {
 		GraphFrame frame = new GraphFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
-//		fr.infLayout();
-//		frame.setGraph(graph);
+//		fr.initLayout(300);
+		fr.infLayout();
+		frame.setGraph(graph);
 		
-		for(int i = 0;i < 200;i++)
-		{
-			fr.calculate();
-			frame.setGraph(graph);
-			
-			try 
-			{
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+//		for(int i = 0;i < 200;i++)
+//		{
+//			fr.calculate();
+//			frame.setGraph(graph);
+//			
+//			try 
+//			{
+//				Thread.sleep(500);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
 		
 			
 	}

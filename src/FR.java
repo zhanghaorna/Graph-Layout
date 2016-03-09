@@ -1,4 +1,5 @@
 
+import java.math.BigDecimal;
 import java.util.Random;
 
 import Data.Edge;
@@ -17,10 +18,10 @@ public class FR {
 	public double t;
 	//迭代次数
 	public int iterations;
-	//总偏移量阈值
-	public double offsetValue;
 	//节点移动量
 	public double offset = Double.MAX_VALUE;
+	
+	public double offsetValue;
 	//上次节点移动量
 	public double pre_offset;
 	
@@ -34,7 +35,7 @@ public class FR {
 		k = Math.sqrt(width * height / graph.points.size());
 		System.out.println("best distance:" + k);
 		t = width / 10;
-		offsetValue = k * 0.001 * graph.points.size();
+		offsetValue = graph.points.size() * 0.1;
 		initGraph();
 	}
 	
@@ -63,14 +64,12 @@ public class FR {
 				point.pos.x = x;
 				point.pos.y = y;
 			}
-
-			
 		}
 	}
 	
 	public double repulsiveForce(double distance)
 	{
-		return 1*k*k/distance;
+		return k*k/distance;
 	}
 	
 	public double attractiveForce(double distance)
@@ -80,9 +79,10 @@ public class FR {
 	
 	public void initLayout(int count)
 	{
-		iterations = count;
 		for(int i = 0;i < count;i++)
 		{
+			
+
 			calculate();
 		}
 	}
@@ -93,6 +93,9 @@ public class FR {
 		{
 			if(offset < offsetValue)
 				break;
+//			if(Math.abs(offset - pre_offset) < 0.0001)
+//				break;
+//			pre_offset = offset;
 			calculate();
 		}
 	}
@@ -138,24 +141,23 @@ public class FR {
 			vector.x = v.pos.x;
 			vector.y = v.pos.y;
 			double length = v.disp.length();
-//			v.disp.x = v.disp.x / length * Math.min(length, t);
-//			v.disp.y = v.disp.y / length * Math.min(length, t);
+			v.disp.x = v.disp.x / length * Math.min(length, t);
+			v.disp.y = v.disp.y / length * Math.min(length, t);
 
 			v.pos.x = v.pos.x + v.disp.x;
 			v.pos.y = v.pos.y + v.disp.y;
+			
 			v.pos.x = Math.min(width / 2, Math.max(- width / 2, v.pos.x));
 			v.pos.y = Math.min(height / 2, Math.max(- height / 2, v.pos.y));
 			vector.x = v.pos.x - vector.x;
 			vector.y = v.pos.y - vector.y;
-			//实际移动量
 			offset += vector.length();
 		}
-		
-		System.out.println("节点移动量" + offset);
-//		if(offset > pre_offset)
-//			t = 0.99 * t;
 
-		pre_offset = offset;
+		System.out.println("节点移动量" + offset  + " 当前温度:" + t);
+		t = 0.95 * t;	
+
+
 			
 	}
 }
