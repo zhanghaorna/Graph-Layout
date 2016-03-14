@@ -35,6 +35,7 @@ public class FR {
 		k = Math.sqrt(width * height / graph.points.size());
 		System.out.println("best distance:" + k);
 		t = width / 10;
+//		offsetValue = graph.points.size() * 0.01 * k;
 		offsetValue = graph.points.size() * 0.1;
 		initGraph();
 	}
@@ -44,8 +45,9 @@ public class FR {
 	{
 		if(graph != null)
 		{
-			Random random = new Random();
+			Random random = new Random(4);
 			int x,y,symbol = 0;
+			
 			for(int i = 0;i < graph.points.size();i++)
 			{
 				symbol = random.nextInt(2);
@@ -93,6 +95,8 @@ public class FR {
 		{
 			if(offset < offsetValue)
 				break;
+//			if(t < 0.5)
+//				break;
 //			if(Math.abs(offset - pre_offset) < 0.0001)
 //				break;
 //			pre_offset = offset;
@@ -153,10 +157,14 @@ public class FR {
 			vector.y = v.pos.y - vector.y;
 			offset += vector.length();
 		}
-
+		
 		System.out.println("节点移动量" + offset  + " 当前温度:" + t);
+//		if(offset < pre_offset)
+//		if(t > 1)
 		t = 0.95 * t;	
-
+//		else
+//			t = Math.pow(Math.E, 1 - t);
+		pre_offset = offset;
 
 			
 	}

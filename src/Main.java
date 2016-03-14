@@ -46,8 +46,9 @@ public class Main {
 		GraphFrame frame = new GraphFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
+		fr.initGraph();
 //		fr.initLayout(300);
-		fr.infLayout();
+//		fr.infLayout();
 		frame.setGraph(graph);
 		
 //		for(int i = 0;i < 200;i++)
