@@ -31,8 +31,10 @@ public class Main {
 		Main main = new Main();
 		Graph graph = main.fileToGraph("graph");		
 		KK kk = new KK(graph,400,400);
-		
-		
+		GraphFrame frame = new GraphFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);		
+		frame.setGraph(kk.graph);
 
 //		System.out.println("points:" + graph.points.size());
 //		FR fr = new FR(graph, 400, 400);
@@ -43,9 +45,7 @@ public class Main {
 //			System.out.println("x:" + point.pos.x + " y:" + point.pos.y);
 //		}
 //		
-//		GraphFrame frame = new GraphFrame();
-//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		frame.setVisible(true);
+
 //		fr.initGraph();
 ////		fr.initLayout(300);
 ////		fr.infLayout();
