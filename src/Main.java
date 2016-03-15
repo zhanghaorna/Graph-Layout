@@ -29,27 +29,27 @@ public class Main {
 	public static void main(String[] args)
 	{
 		Main main = new Main();
+		Graph graph = main.fileToGraph("graph");		
+		KK kk = new KK(graph,400,400);
+		
 		
 
-		
-		
-		Graph graph = main.fileToGraph("graph1");
-		System.out.println("points:" + graph.points.size());
-		FR fr = new FR(graph, 400, 400);
-//		fr.initLayout(300);
-		for(int i = 0;i < graph.points.size();i++)
-		{
-			Point point = graph.points.get(i);
-			System.out.println("x:" + point.pos.x + " y:" + point.pos.y);
-		}
-		
-		GraphFrame frame = new GraphFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
-		fr.initGraph();
-//		fr.initLayout(300);
-//		fr.infLayout();
-		frame.setGraph(graph);
+//		System.out.println("points:" + graph.points.size());
+//		FR fr = new FR(graph, 400, 400);
+////		fr.initLayout(300);
+//		for(int i = 0;i < graph.points.size();i++)
+//		{
+//			Point point = graph.points.get(i);
+//			System.out.println("x:" + point.pos.x + " y:" + point.pos.y);
+//		}
+//		
+//		GraphFrame frame = new GraphFrame();
+//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		frame.setVisible(true);
+//		fr.initGraph();
+////		fr.initLayout(300);
+////		fr.infLayout();
+//		frame.setGraph(graph);
 		
 //		for(int i = 0;i < 200;i++)
 //		{
