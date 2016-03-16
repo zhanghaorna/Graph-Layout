@@ -1,4 +1,7 @@
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
+import java.util.Set;
 
 import Data.Edge;
 import Data.Graph;
@@ -37,16 +40,20 @@ public class KK {
 	public double choose_delta;
 	//最大迭代次数
 	public int count;
-	//标记节点
-	public int flag;
+	//最大迭代总次数
+	public int whole_count;
+	//标记点集合
+	public Set<Integer> set;
 	
 	public Graph graph;
 	
 	public KK(Graph graph,int width,int height)
 	{
 		this.graph = graph;
-		value = 10;
+		value = 1;
 		count = 20;
+		whole_count = count * graph.points.size() * 5000;
+		set = new HashSet<Integer>();
 		this.width = width;
 		this.height = height;
 		num = graph.points.size();
@@ -81,8 +88,11 @@ public class KK {
 			for(int i = 0;i < num;i++)
 				for(int j = 0;j < num;j++)
 				{
-					if(d[i][j] > d[i][k] + d[k][j])
-						d[i][j] = d[i][k] + d[k][j];
+					if(d[i][k] != Integer.MAX_VALUE&&d[k][j] != Integer.MAX_VALUE)
+					{
+						if(d[i][j] > d[i][k] + d[k][j])
+							d[i][j] = d[i][k] + d[k][j];
+					}
 				}
 		//计算最佳距离矩阵
 		int maxD = 0;
@@ -105,55 +115,82 @@ public class KK {
 					k[i][j] = K / (d[i][j] * d[i][j]);
 				}
 			}
-		Random random = new Random();
+		Random random = new Random(5);
 		//初始化所有节点
 		for(int i = 0;i < num;i++)
 		{
 			Point point = new Point(i);
-			point.pos.x = random.nextInt(width);
-			point.pos.y = random.nextInt(height);
+			point.pos.x = random.nextInt(width) + 10;
+			point.pos.y = random.nextInt(height) + 10;
 			this.point[i] = point;
+			set.add(i);
 		}
+		
+		
 		computeDelta();
 		layout();
 		for(int i = 0;i < graph.points.size();i++)
 		{
 			Point point = graph.points.get(i);
-			point.pos.x = this.point[point.num].pos.x;
-			point.pos.y = this.point[point.num].pos.y;
+			point.pos.x = this.point[point.num - 1].pos.x;
+			point.pos.y = this.point[point.num - 1].pos.y;
 		}
+		System.out.println(whole_count);
 	}
 	
 	
 	
 	public void layout()
 	{
-		double maxDelta = delta[0];
-		vertex = 0;
-		for(int i = 0;i < num;i++)
+		while(true)
 		{
-			if(delta[i] > maxDelta)
-			{
-				maxDelta = delta[i];
-				vertex = i;
-			}
-		}
-		if(maxDelta < value)
+			double maxDelta = -1;
 			vertex = -1;
-		if(vertex == -1)
-			return;
-		choose_delta = maxDelta;
-		System.out.println(choose_delta);
-		int num = 0;
-		while(choose_delta > value)
-		{
-			computeOffset(vertex);
-			num++;
-			if(num > 20)
-				break;
+			if(set.size() == 0)
+			{
+				for(int i = 0;i < num;i++)
+				{
+					set.add(i);
+				}
+			}
+			Iterator<Integer> iterator = set.iterator();
+			while(iterator.hasNext())
+			{
+				int num = iterator.next().intValue();
+				if(delta[num] > maxDelta)
+				{
+					maxDelta = delta[num];
+					vertex = num;
+				}
+			}
+
+			choose_delta = maxDelta;
+//			if(set.size() == num)
+//			{
+//				System.out.println(choose_delta);
+//				if(choose_delta < value)
+//					break;
+//			}
+			System.out.println("vertex" + vertex);
+			int num = 0;
+			while(choose_delta > value)
+			{
+				if(!computeOffset(vertex))
+				{
+					break;
+				}
+				num++;
+				whole_count--;
+				if(num > count)
+				{
+					break;
+				}
+			}
+			set.remove(vertex);
+			if(whole_count < 0)
+				return;
+			computeDelta();
 		}
-		computeDelta();
-		layout();
 	}
 	
 	//计算所有delta
@@ -177,6 +214,8 @@ public class KK {
 				}
 			}
 			delta[i] = Math.sqrt(EX * EX + EY * EY);
+			if(Double.isNaN(delta[i]))
+				delta[i] = 0;
 		}
 	}
 	
@@ -199,12 +238,13 @@ public class KK {
 			}
 		}
 		delta[m] = Math.sqrt(EX * EX + EY * EY);
+		if(Double.isNaN(delta[m]))
+			delta[m] = 0;
 		choose_delta = delta[m];
-		System.out.println(choose_delta);
 	}
 	
 	//计算节点偏移量,并进行偏移
-	public void computeOffset(int m)
+	public boolean computeOffset(int m)
 	{
 		double EX2 = 0,EXY = 0,EYX = 0,EY2 = 0,EX = 0,EY = 0;
 		
@@ -223,10 +263,15 @@ public class KK {
  		}
 		double offset_x = (EXY*EY - EX*EY2) / (EX2*EY2 - EXY*EYX);
 		double offset_y = (EX*EYX - EX2*EY) / (EX2*EY2 - EXY*EYX);
-		
+		if(Double.isNaN(offset_x)&&Double.isNaN(offset_y))
+			return false;
+//		System.out.println("x:" + offset_x + " y:" + offset_y);
 		point[m].pos.x += offset_x;
 		point[m].pos.y += offset_y;
+		point[m].pos.x = Math.max(Math.min(point[m].pos.x, width + 10), 10);
+		point[m].pos.y = Math.max(Math.min(point[m].pos.y, height + 10), 10);
 		computeDelta(m);
+		return true;
 	}
 	
 

@@ -17,10 +17,10 @@ public class GraphFrame extends JFrame{
 		add(drawComponent);
 	}
 	
-	public void setGraph(Graph graph)
+	public void setGraph(Graph graph,int radius)
 	{
 		this.graph = graph;
-		drawComponent.setGraph(graph);
+		drawComponent.setGraph(graph,radius);
 		repaint();
 	}
 	

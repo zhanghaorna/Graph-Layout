@@ -20,7 +20,7 @@ public class DrawComponent extends JComponent{
 	
 	//偏移量
 	public static int offset = 10;
-
+	public int radius;
 	
 	@Override
 	protected void paintComponent(Graphics g) {
@@ -29,14 +29,14 @@ public class DrawComponent extends JComponent{
 			for(int i = 0;i < graph.points.size();i++)
 			{
 				Point point = graph.points.get(i);
-				g.fillOval((int)(point.pos.x + 200 - 3 + offset),(int)(point.pos.y + 200 - 3 + offset), 6, 6);
+				g.fillOval((int)(point.pos.x + radius - 3 + offset),(int)(point.pos.y + radius - 3 + offset), 6, 6);
 			}
 			for(int i = 0;i < graph.edges.size();i++)
 			{
 				Edge edge = graph.edges.get(i);
-				g.drawLine((int)(edge.u.pos.x + 200 + offset), (int)(edge.u.pos.y + 200 + offset),
-						(int)(edge.v.pos.x + 200 + offset),
-						(int)(edge.v.pos.y + 200 + offset));
+				g.drawLine((int)(edge.u.pos.x + radius + offset), (int)(edge.u.pos.y + radius + offset),
+						(int)(edge.v.pos.x + radius + offset),
+						(int)(edge.v.pos.y + radius + offset));
 			}
 
 		}
@@ -44,9 +44,10 @@ public class DrawComponent extends JComponent{
 		
 	}
 	
-	public void setGraph(Graph graph)
+	public void setGraph(Graph graph,int radius)
 	{
 		this.graph = graph;
+		this.radius = radius;
 		repaint();
 	}
 	
