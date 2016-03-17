@@ -45,7 +45,7 @@ public class FR {
 	{
 		if(graph != null)
 		{
-			Random random = new Random(4);
+			Random random = new Random();
 			int x,y,symbol = 0;
 			
 			for(int i = 0;i < graph.points.size();i++)

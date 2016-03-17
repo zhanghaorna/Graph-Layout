@@ -29,7 +29,7 @@ public class Main {
 	public static void main(String[] args)
 	{
 		Main main = new Main();
-		Graph graph = main.fileToGraph("graph2");		
+		Graph graph = main.fileToGraph("graph3");		
 		KK kk = new KK(graph,400,400);
 		
 //		FR fr = new FR(graph, 400, 400);
