@@ -46,6 +46,10 @@ public class KK {
 	public Set<Integer> set;
 	
 	public Graph graph;
+	//温度T
+	public double T;
+	//目前系统总能量
+	public double wholeE;
 	
 	public KK(Graph graph,int width,int height)
 	{
@@ -63,6 +67,7 @@ public class KK {
 		k = new double[num][num];
 		point = new Point[num];
 		delta = new double[num];
+		T = width;
 		//floyd算法求最短路径矩阵
 		for(int i = 0;i < num;i++)
 			for(int j = 0;j < num;j++)
@@ -115,7 +120,7 @@ public class KK {
 					k[i][j] = K / (d[i][j] * d[i][j]);
 				}
 			}
-		Random random = new Random(5);
+		Random random = new Random();
 		//初始化所有节点
 		for(int i = 0;i < num;i++)
 		{
@@ -126,16 +131,86 @@ public class KK {
 			set.add(i);
 		}
 		
+		wholeE = computeE();
 		
-		computeDelta();
-		layout();
+		changeVertexPosition();
+//		computeDelta();
+//		layout();
 		for(int i = 0;i < graph.points.size();i++)
 		{
 			Point point = graph.points.get(i);
 			point.pos.x = this.point[point.num - 1].pos.x;
 			point.pos.y = this.point[point.num - 1].pos.y;
 		}
-		System.out.println(whole_count);
+//		System.out.println(whole_count);
+	}
+	
+	public void changeVertexPosition()
+	{
+		Random random = new Random();
+		double[] x_set = new double[num];
+		double[] y_set = new double[num];
+		int count = 10;
+		do 
+		{
+			for(int i = 0;i < num;i++)
+			{
+				double offset_x = random.nextInt((int)T);
+				double offset_y = random.nextInt((int)T);
+				if(T < 1)
+				{
+					offset_x = random.nextDouble();
+					offset_y = random.nextDouble();
+				}
+
+				int symbol = random.nextInt(2);
+				if(symbol == 1)
+					offset_x = -offset_x;
+				symbol = random.nextInt(2);
+				if(symbol == 1)
+					offset_y = -offset_y;
+				x_set[i] = offset_x;
+				y_set[i] = offset_y;
+				if(point[i].pos.x + offset_x > width + 10)
+				{
+					x_set[i] = width + 10 - point[i].pos.x;
+				}
+				if(point[i].pos.x + offset_x < 10)
+				{
+					x_set[i] = point[i].pos.x - 10;
+				}
+				if(point[i].pos.y + offset_y > height + 10)
+				{
+					y_set[i] = height + 10 - point[i].pos.y;
+				}
+				if(point[i].pos.y + offset_y < 10)
+				{
+					y_set[i] = point[i].pos.y - 10;
+				}
+				point[i].pos.x += x_set[i];
+				point[i].pos.y += y_set[i];
+			}
+			double temp = computeE();
+			if(temp < wholeE)
+			{
+				temp = wholeE;
+				T = 0.9 * T;
+				count = 10;
+			}
+			else
+			{
+				for(int i = 0;i < num;i++)
+				{
+					point[i].pos.x -= x_set[i];
+					point[i].pos.y -= y_set[i];
+				}
+				count--;
+			}
+		} while (T < 1&&count < 0);
+		
+
+		
+		
 	}
 	
 	
@@ -171,7 +246,7 @@ public class KK {
 //				if(choose_delta < value)
 //					break;
 //			}
-			System.out.println("vertex" + vertex);
+//			System.out.println("vertex" + vertex);
 			int num = 0;
 			while(choose_delta > value)
 			{
@@ -265,6 +340,8 @@ public class KK {
 		double offset_y = (EX*EYX - EX2*EY) / (EX2*EY2 - EXY*EYX);
 		if(Double.isNaN(offset_x)&&Double.isNaN(offset_y))
 			return false;
+		if(Math.abs(offset_x) < 0.1&&Math.abs(offset_y) < 0.1)
+			return false;
 //		System.out.println("x:" + offset_x + " y:" + offset_y);
 		point[m].pos.x += offset_x;
 		point[m].pos.y += offset_y;
@@ -272,6 +349,21 @@ public class KK {
 		point[m].pos.y = Math.max(Math.min(point[m].pos.y, height + 10), 10);
 		computeDelta(m);
 		return true;
+	}
+	
+	
+	public double computeE()
+	{
+		double E = 0;
+		for(int i = 0;i < num - 1;i++)
+			for(int j = i + 1;j < num;j++)
+			{
+				double Xij = point[i].pos.x - point[j].pos.x;
+				double Yij = point[i].pos.y - point[j].pos.y;
+				double distance = Math.sqrt(Xij * Xij + Yij * Yij);
+				E += k[i][j] * 0.5 * Math.pow((distance - l[i][j]), 2);
+			}
+		return E;
 	}
 	
 
