@@ -365,6 +365,73 @@ public class KK {
 		return E;
 	}
 	
+	//对节点m进行移动
+	public void randomOffset(int m)
+	{
+		Random random = new Random();
+		int count = 10;
+		//0代表向上，1代表向右，2代表向下，3代表向左
+		int or = 0;
+		while(count > 0)
+		{
+			switch (or) {
+			case 0:
+				double y = point[m].pos.y;
+				double height = Math.min(y - 10,T);
+				int offset = random.nextInt((int)(height));
+				if(computeDelta(m, 0, -offset))
+				{
+					T = T * 0.9;
+					count = 10;
+				}
+				else
+				{
+					or++;
+					count--;
+				}
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
+	
+	public boolean computeDelta(int m ,int offset_x,int offset_y)
+	{
+		double EX = 0;
+		double EY = 0;
+		for(int j = 0;j < num;j++)
+		{
+			if(m != j)
+			{
+				double v1 = 0;
+				if(offset_x != 0)
+					v1 = point[m].pos.x + offset_x - point[j].pos.x;
+				double v2 = 0;
+				if(offset_y != 0)
+					v2 = point[m].pos.y + offset_y - point[j].pos.y;
+				double v3 = l[m][j] * v1;
+				double v4 = l[m][j] * v2;
+				double v5 = Math.sqrt(v1*v1 + v2*v2);
+				EX += k[m][j]*(v1 - v3 / v5);
+				EY += k[m][j]*(v2 - v4 / v5);
+			}
+		}
+		double delt = Math.sqrt(EX * EX + EY * EY);
+		if(Double.isNaN(delt))
+			delt = 0;
+		if(delt < delta[m])
+		{
+			delta[m] = delt;
+			choose_delta = delta[m];
+			return true;
+		}
+		else {
+			return false;
+		}
+		
+	}
 
 
 }
