@@ -56,7 +56,7 @@ public class KK {
 		this.graph = graph;
 		value = 1;
 		count = 20;
-		whole_count = count * graph.points.size() * 5000;
+		whole_count = count * graph.points.size() * 500;
 		set = new HashSet<Integer>();
 		this.width = width;
 		this.height = height;
@@ -67,7 +67,7 @@ public class KK {
 		k = new double[num][num];
 		point = new Point[num];
 		delta = new double[num];
-		T = width;
+		T = width / 10;
 		//floyd算法求最短路径矩阵
 		for(int i = 0;i < num;i++)
 			for(int j = 0;j < num;j++)
@@ -133,9 +133,10 @@ public class KK {
 		
 		wholeE = computeE();
 		
-		changeVertexPosition();
-//		computeDelta();
-//		layout();
+//		changeVertexPosition();
+		
+		computeDelta();
+		layout();
 		for(int i = 0;i < graph.points.size();i++)
 		{
 			Point point = graph.points.get(i);
@@ -206,11 +207,7 @@ public class KK {
 				}
 				count--;
 			}
-		} while (T < 1&&count < 0);
-		
-
-		
-		
+		} while (T < 1&&count < 0);		
 	}
 	
 	
@@ -250,12 +247,12 @@ public class KK {
 			int num = 0;
 			while(choose_delta > value)
 			{
+				whole_count--;
 				if(!computeOffset(vertex))
 				{
 					break;
 				}
 				num++;
-				whole_count--;
 				if(num > count)
 				{
 					break;
@@ -321,32 +318,34 @@ public class KK {
 	//计算节点偏移量,并进行偏移
 	public boolean computeOffset(int m)
 	{
-		double EX2 = 0,EXY = 0,EYX = 0,EY2 = 0,EX = 0,EY = 0;
+//		double EX2 = 0,EXY = 0,EYX = 0,EY2 = 0,EX = 0,EY = 0;
+//		
+//		for(int i = 0;i < num&&i!= m;i++)
+//		{
+//			double Xmi = point[m].pos.x - point[i].pos.x;
+//			double Ymi = point[m].pos.y - point[i].pos.y;
+//			double XY = Xmi*Xmi + Ymi*Ymi;
+//			double sqrtXY = Math.sqrt(XY);
+//			EX += k[m][i] * (Xmi - l[m][i]*Xmi / sqrtXY);
+//			EY += k[m][i] * (Ymi - l[m][i]*Ymi / sqrtXY);
+//			EX2 += k[m][i] * (1 - l[m][i]*Ymi*Ymi / (sqrtXY * XY));
+//			EXY += k[m][i] * (l[m][i]*Xmi*Ymi / (sqrtXY * XY));
+//			EYX += k[m][i] * (l[m][i]*Xmi*Ymi / (sqrtXY * XY));
+//			EY2 += k[m][i] * (1 - l[m][i]*Xmi*Xmi / (sqrtXY * XY));
+// 		}
+//		double offset_x = (EXY*EY - EX*EY2) / (EX2*EY2 - EXY*EYX);
+//		double offset_y = (EX*EYX - EX2*EY) / (EX2*EY2 - EXY*EYX);
+//		if(Double.isNaN(offset_x)&&Double.isNaN(offset_y))
+//			return false;
+//		if(Math.abs(offset_x) < 0.1&&Math.abs(offset_y) < 0.1)
+//			return false;
+////		System.out.println("x:" + offset_x + " y:" + offset_y);
+//		point[m].pos.x += offset_x;
+//		point[m].pos.y += offset_y;
+//		point[m].pos.x = Math.max(Math.min(point[m].pos.x, width + 10), 10);
+//		point[m].pos.y = Math.max(Math.min(point[m].pos.y, height + 10), 10);
 		
-		for(int i = 0;i < num&&i!= m;i++)
-		{
-			double Xmi = point[m].pos.x - point[i].pos.x;
-			double Ymi = point[m].pos.y - point[i].pos.y;
-			double XY = Xmi*Xmi + Ymi*Ymi;
-			double sqrtXY = Math.sqrt(XY);
-			EX += k[m][i] * (Xmi - l[m][i]*Xmi / sqrtXY);
-			EY += k[m][i] * (Ymi - l[m][i]*Ymi / sqrtXY);
-			EX2 += k[m][i] * (1 - l[m][i]*Ymi*Ymi / (sqrtXY * XY));
-			EXY += k[m][i] * (l[m][i]*Xmi*Ymi / (sqrtXY * XY));
-			EYX += k[m][i] * (l[m][i]*Xmi*Ymi / (sqrtXY * XY));
-			EY2 += k[m][i] * (1 - l[m][i]*Xmi*Xmi / (sqrtXY * XY));
- 		}
-		double offset_x = (EXY*EY - EX*EY2) / (EX2*EY2 - EXY*EYX);
-		double offset_y = (EX*EYX - EX2*EY) / (EX2*EY2 - EXY*EYX);
-		if(Double.isNaN(offset_x)&&Double.isNaN(offset_y))
-			return false;
-		if(Math.abs(offset_x) < 0.1&&Math.abs(offset_y) < 0.1)
-			return false;
-//		System.out.println("x:" + offset_x + " y:" + offset_y);
-		point[m].pos.x += offset_x;
-		point[m].pos.y += offset_y;
-		point[m].pos.x = Math.max(Math.min(point[m].pos.x, width + 10), 10);
-		point[m].pos.y = Math.max(Math.min(point[m].pos.y, height + 10), 10);
+		
 		computeDelta(m);
 		return true;
 	}
