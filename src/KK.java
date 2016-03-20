@@ -56,7 +56,7 @@ public class KK {
 		this.graph = graph;
 		value = 1;
 		count = 20;
-		whole_count = count * graph.points.size() * 500;
+		whole_count = count * graph.points.size() * 100;
 		set = new HashSet<Integer>();
 		this.width = width;
 		this.height = height;
@@ -244,20 +244,26 @@ public class KK {
 //					break;
 //			}
 //			System.out.println("vertex" + vertex);
-			int num = 0;
-			while(choose_delta > value)
-			{
-				whole_count--;
-				if(!computeOffset(vertex))
-				{
-					break;
-				}
-				num++;
-				if(num > count)
-				{
-					break;
-				}
-			}
+			System.out.println("before" + choose_delta);
+			randomOffset(vertex);
+			whole_count--;
+			System.out.println("after " + choose_delta);
+//			int num = 0;
+//			while(choose_delta > value)
+//			{
+//				randomOffset(vertex);
+				
+//				whole_count--;
+//				if(!computeOffset(vertex))
+//				{
+//					break;
+//				}
+//				num++;
+//				if(num > count)
+//				{
+//					break;
+//				}
+//			}
 			set.remove(vertex);
 			if(whole_count < 0)
 				return;
@@ -368,36 +374,83 @@ public class KK {
 	//对节点m进行移动
 	public void randomOffset(int m)
 	{
+		T = width / 10;
 		Random random = new Random();
 		int count = 10;
 		//0代表向上，1代表向右，2代表向下，3代表向左
 		int or = 0;
 		while(count > 0)
 		{
+			int offset = 0;
+			double x = 0,y = 0;
+			double height = 0,width = 0;
+			int result = 2;
 			switch (or) {
 			case 0:
-				double y = point[m].pos.y;
-				double height = Math.min(y - 10,T);
-				int offset = random.nextInt((int)(height));
-				if(computeDelta(m, 0, -offset))
-				{
-					T = T * 0.9;
-					count = 10;
-				}
+				y = point[m].pos.y;
+				height = Math.min(y - 10,T);
+				if(height - 1 < 1)
+					offset = 1;
 				else
-				{
-					or++;
-					count--;
-				}
+					offset = random.nextInt((int)(height - 1)) + 1;
+				if(y - offset > 10)				
+					result = computeDelta(m, 0, -offset);
+	
 				break;
-
+			case 1:
+				x = point[m].pos.x;
+				width = Math.min(x - 10, T);
+				if(width - 1 < 1)
+					offset = 1;
+				else
+					offset = random.nextInt((int)(width - 1)) + 1;
+				if(x + offset < this.width + 10)
+					result = computeDelta(m, offset, 0);
+				break;
+			case 2:
+				y = point[m].pos.y;
+				height = Math.min(this.height + 10 - y,T);
+				if(height - 1 < 1)
+					offset = 1;
+				else
+					offset = random.nextInt((int)(height - 1)) + 1;
+				if(y + offset < this.height + 10)
+					result = computeDelta(m, 0, offset);
+				break;
+			case 3:
+				x = point[m].pos.x;
+				width = Math.min(this.width + 10 - x, T);
+				if(width - 1 < 1)
+					offset = 1;
+				else
+					offset = random.nextInt((int)(width - 1)) + 1;
+				if(x - offset > 10)
+					result = computeDelta(m, -offset, 0);
+				break;
 			default:
 				break;
+			}
+			if(result == 0)
+			{
+				return;
+			}
+			else if(result == 1)
+			{
+				T = T * 0.9;
+				count = 10;
+			}
+			else 
+			{
+				or++;
+				if(or == 4)
+					or = 0;
+				count--;
 			}
 		}
 	}
 	
-	public boolean computeDelta(int m ,int offset_x,int offset_y)
+	//0表示已比设置的阈值小，1表示原来的delta大，2就表示比原来的delta大
+	public int computeDelta(int m ,int offset_x,int offset_y)
 	{
 		double EX = 0;
 		double EY = 0;
@@ -407,10 +460,19 @@ public class KK {
 			{
 				double v1 = 0;
 				if(offset_x != 0)
+				{
 					v1 = point[m].pos.x + offset_x - point[j].pos.x;
+					if(Math.abs(v1) < 0.1)
+						return 2;
+				}
 				double v2 = 0;
 				if(offset_y != 0)
+				{
 					v2 = point[m].pos.y + offset_y - point[j].pos.y;
+					if(Math.abs(v2) < 0.1)
+						return 2;
+				}
+
 				double v3 = l[m][j] * v1;
 				double v4 = l[m][j] * v2;
 				double v5 = Math.sqrt(v1*v1 + v2*v2);
@@ -423,12 +485,19 @@ public class KK {
 			delt = 0;
 		if(delt < delta[m])
 		{
+			point[m].pos.x += offset_x;
+			point[m].pos.y += offset_y;
+
 			delta[m] = delt;
 			choose_delta = delta[m];
-			return true;
+			if(choose_delta < value)
+				return 0;
+			else {
+				return 1;
+			}
 		}
 		else {
-			return false;
+			return 2;
 		}
 		
 	}
