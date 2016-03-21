@@ -32,6 +32,8 @@ public class KK {
 	public Point point[];
 	//节点的delta值
 	public double delta[];
+	//节点产生的能量值
+	public double E[];
 	//初设的阈值
 	public double value;
 	//选中的最大delta值节点
@@ -67,6 +69,7 @@ public class KK {
 		k = new double[num][num];
 		point = new Point[num];
 		delta = new double[num];
+		E = new double[num];
 		T = width / 10;
 		//floyd算法求最短路径矩阵
 		for(int i = 0;i < num;i++)
@@ -107,7 +110,7 @@ public class KK {
 				if(d[i][j] != Integer.MAX_VALUE&&d[i][j] > maxD)
 					maxD = d[i][j];
 			}
-		double L = ((double)width) / maxD;
+		double L = ((double)width) / 10;
 
 		//计算节点间的弹簧力
 		double K = maxD * maxD;
@@ -120,7 +123,7 @@ public class KK {
 					k[i][j] = K / (d[i][j] * d[i][j]);
 				}
 			}
-		Random random = new Random();
+		Random random = new Random(1);
 		//初始化所有节点
 		for(int i = 0;i < num;i++)
 		{
@@ -131,12 +134,18 @@ public class KK {
 			set.add(i);
 		}
 		
-		wholeE = computeE();
+		computeE();
+//		wholeE = computeE();
 		
 //		changeVertexPosition();
 		
-		computeDelta();
+//		computeDelta();
+		long start = System.currentTimeMillis();
 		layout();
+		long end = System.currentTimeMillis();
+		
+		System.out.println(end - start);
+		
 		for(int i = 0;i < graph.points.size();i++)
 		{
 			Point point = graph.points.get(i);
@@ -191,22 +200,22 @@ public class KK {
 				point[i].pos.x += x_set[i];
 				point[i].pos.y += y_set[i];
 			}
-			double temp = computeE();
-			if(temp < wholeE)
-			{
-				temp = wholeE;
-				T = 0.9 * T;
-				count = 10;
-			}
-			else
-			{
-				for(int i = 0;i < num;i++)
-				{
-					point[i].pos.x -= x_set[i];
-					point[i].pos.y -= y_set[i];
-				}
-				count--;
-			}
+//			double temp = computeE();
+//			if(temp < wholeE)
+//			{
+//				temp = wholeE;
+//				T = 0.9 * T;
+//				count = 10;
+//			}
+//			else
+//			{
+//				for(int i = 0;i < num;i++)
+//				{
+//					point[i].pos.x -= x_set[i];
+//					point[i].pos.y -= y_set[i];
+//				}
+//				count--;
+//			}
 		} while (T < 1&&count < 0);		
 	}
 	
@@ -217,6 +226,7 @@ public class KK {
 		while(true)
 		{
 			double maxDelta = -1;
+			double maxE = -1;
 			vertex = -1;
 			if(set.size() == 0)
 			{
@@ -229,14 +239,19 @@ public class KK {
 			while(iterator.hasNext())
 			{
 				int num = iterator.next().intValue();
-				if(delta[num] > maxDelta)
+//				if(delta[num] > maxDelta)
+//				{
+//					maxDelta = delta[num];
+//					vertex = num;
+//				}
+				if(E[num] > maxE)
 				{
-					maxDelta = delta[num];
+					maxE = E[num];
 					vertex = num;
 				}
 			}
-
-			choose_delta = maxDelta;
+			choose_delta = maxE;
+//			choose_delta = maxDelta;
 //			if(set.size() == num)
 //			{
 //				System.out.println(choose_delta);
@@ -244,32 +259,75 @@ public class KK {
 //					break;
 //			}
 //			System.out.println("vertex" + vertex);
-			System.out.println("before" + choose_delta);
-			randomOffset(vertex);
-			whole_count--;
-			System.out.println("after " + choose_delta);
-//			int num = 0;
-//			while(choose_delta > value)
-//			{
+//			if(choose_delta > value)
 //				randomOffset(vertex);
-				
-//				whole_count--;
-//				if(!computeOffset(vertex))
-//				{
-//					break;
-//				}
-//				num++;
-//				if(num > count)
-//				{
-//					break;
-//				}
-//			}
+//			whole_count--;
+			
+
+
+			int num = 0;
+			while(choose_delta > value)
+			{
+				computeE(vertex);
+				whole_count--;
+				if(!computeOffset(vertex))
+				{
+					break;
+				}
+				num++;
+				if(num > count)
+				{
+					break;
+				}
+			}
+			
 			set.remove(vertex);
 			if(whole_count < 0)
 				return;
-			computeDelta();
+			
+//			computeDelta();
 		}
 	}
+	
+	//计算所有的E
+	public void computeE()
+	{
+		double E = 0;
+		for(int i = 0;i < num;i++)
+		{
+			E = 0;
+			for(int j = 0;j < num;j++)
+			{
+				if(i != j)
+				{
+					double Xij = point[i].pos.x - point[j].pos.x;
+					double Yij = point[i].pos.y - point[j].pos.y;
+					double distance = Math.sqrt(Xij * Xij + Yij * Yij);
+					E += k[i][j] * 0.5 * Math.pow((distance - l[i][j]), 2);
+				}
+			}
+			this.E[i] = E;
+		}
+	}
+	
+	//计算单个E
+	public void computeE(int m)
+	{
+		double E = 0;
+		for(int i = 0;i < num;i++)
+		{
+			if(i != m)
+			{
+				double Xij = point[m].pos.x - point[i].pos.x;
+				double Yij = point[m].pos.y - point[i].pos.y;
+				double distance = Math.sqrt(Xij * Xij + Yij * Yij);
+				E += k[m][i] * 0.5 * Math.pow((distance - l[m][i]), 2);
+			}
+		}
+		this.E[m] = E;
+		choose_delta = E;
+	}
+	
 	
 	//计算所有delta
 	public void computeDelta()
@@ -324,59 +382,59 @@ public class KK {
 	//计算节点偏移量,并进行偏移
 	public boolean computeOffset(int m)
 	{
-//		double EX2 = 0,EXY = 0,EYX = 0,EY2 = 0,EX = 0,EY = 0;
-//		
-//		for(int i = 0;i < num&&i!= m;i++)
-//		{
-//			double Xmi = point[m].pos.x - point[i].pos.x;
-//			double Ymi = point[m].pos.y - point[i].pos.y;
-//			double XY = Xmi*Xmi + Ymi*Ymi;
-//			double sqrtXY = Math.sqrt(XY);
-//			EX += k[m][i] * (Xmi - l[m][i]*Xmi / sqrtXY);
-//			EY += k[m][i] * (Ymi - l[m][i]*Ymi / sqrtXY);
-//			EX2 += k[m][i] * (1 - l[m][i]*Ymi*Ymi / (sqrtXY * XY));
-//			EXY += k[m][i] * (l[m][i]*Xmi*Ymi / (sqrtXY * XY));
-//			EYX += k[m][i] * (l[m][i]*Xmi*Ymi / (sqrtXY * XY));
-//			EY2 += k[m][i] * (1 - l[m][i]*Xmi*Xmi / (sqrtXY * XY));
-// 		}
-//		double offset_x = (EXY*EY - EX*EY2) / (EX2*EY2 - EXY*EYX);
-//		double offset_y = (EX*EYX - EX2*EY) / (EX2*EY2 - EXY*EYX);
-//		if(Double.isNaN(offset_x)&&Double.isNaN(offset_y))
-//			return false;
-//		if(Math.abs(offset_x) < 0.1&&Math.abs(offset_y) < 0.1)
-//			return false;
-////		System.out.println("x:" + offset_x + " y:" + offset_y);
-//		point[m].pos.x += offset_x;
-//		point[m].pos.y += offset_y;
-//		point[m].pos.x = Math.max(Math.min(point[m].pos.x, width + 10), 10);
-//		point[m].pos.y = Math.max(Math.min(point[m].pos.y, height + 10), 10);
+		double EX2 = 0,EXY = 0,EYX = 0,EY2 = 0,EX = 0,EY = 0;
 		
+		for(int i = 0;i < num&&i!= m;i++)
+		{
+			double Xmi = point[m].pos.x - point[i].pos.x;
+			double Ymi = point[m].pos.y - point[i].pos.y;
+			double XY = Xmi*Xmi + Ymi*Ymi;
+			double sqrtXY = Math.sqrt(XY);
+			EX += k[m][i] * (Xmi - l[m][i]*Xmi / sqrtXY);
+			EY += k[m][i] * (Ymi - l[m][i]*Ymi / sqrtXY);
+			EX2 += k[m][i] * (1 - l[m][i]*Ymi*Ymi / (sqrtXY * XY));
+			EXY += k[m][i] * (l[m][i]*Xmi*Ymi / (sqrtXY * XY));
+			EYX += k[m][i] * (l[m][i]*Xmi*Ymi / (sqrtXY * XY));
+			EY2 += k[m][i] * (1 - l[m][i]*Xmi*Xmi / (sqrtXY * XY));
+ 		}
+		double offset_x = (EXY*EY - EX*EY2) / (EX2*EY2 - EXY*EYX);
+		double offset_y = (EX*EYX - EX2*EY) / (EX2*EY2 - EXY*EYX);
+		if(Double.isNaN(offset_x)&&Double.isNaN(offset_y))
+			return false;
+		if(Math.abs(offset_x) < 0.1&&Math.abs(offset_y) < 0.1)
+			return false;
+//		System.out.println("x:" + offset_x + " y:" + offset_y);
+		point[m].pos.x += offset_x;
+		point[m].pos.y += offset_y;
+		point[m].pos.x = Math.max(Math.min(point[m].pos.x, width + 10), 10);
+		point[m].pos.y = Math.max(Math.min(point[m].pos.y, height + 10), 10);
 		
-		computeDelta(m);
+		computeE(m);
+//		computeDelta(m);
 		return true;
 	}
 	
 	
-	public double computeE()
-	{
-		double E = 0;
-		for(int i = 0;i < num - 1;i++)
-			for(int j = i + 1;j < num;j++)
-			{
-				double Xij = point[i].pos.x - point[j].pos.x;
-				double Yij = point[i].pos.y - point[j].pos.y;
-				double distance = Math.sqrt(Xij * Xij + Yij * Yij);
-				E += k[i][j] * 0.5 * Math.pow((distance - l[i][j]), 2);
-			}
-		return E;
-	}
+//	public double computeE()
+//	{
+//		double E = 0;
+//		for(int i = 0;i < num - 1;i++)
+//			for(int j = i + 1;j < num;j++)
+//			{
+//				double Xij = point[i].pos.x - point[j].pos.x;
+//				double Yij = point[i].pos.y - point[j].pos.y;
+//				double distance = Math.sqrt(Xij * Xij + Yij * Yij);
+//				E += k[i][j] * 0.5 * Math.pow((distance - l[i][j]), 2);
+//			}
+//		return E;
+//	}
 	
 	//对节点m进行移动
 	public void randomOffset(int m)
 	{
 		T = width / 10;
 		Random random = new Random();
-		int count = 10;
+		int count = 4;
 		//0代表向上，1代表向右，2代表向下，3代表向左
 		int or = 0;
 		while(count > 0)
@@ -388,44 +446,52 @@ public class KK {
 			switch (or) {
 			case 0:
 				y = point[m].pos.y;
-				height = Math.min(y - 10,T);
-				if(height - 1 < 1)
-					offset = 1;
-				else
-					offset = random.nextInt((int)(height - 1)) + 1;
-				if(y - offset > 10)				
-					result = computeDelta(m, 0, -offset);
+				if(y > 11)
+					result = computeDelta(m, 0, -1);
+//				height = Math.min(y - 10,T);
+//				if(height - 1 < 1)
+//					offset = 1;
+//				else
+//					offset = random.nextInt((int)(height - 1)) + 1;
+//				if(y - offset > 10)				
+//					result = computeDelta(m, 0, -offset);
 	
 				break;
 			case 1:
 				x = point[m].pos.x;
-				width = Math.min(x - 10, T);
-				if(width - 1 < 1)
-					offset = 1;
-				else
-					offset = random.nextInt((int)(width - 1)) + 1;
-				if(x + offset < this.width + 10)
-					result = computeDelta(m, offset, 0);
+				if(x < this.width + 9)
+					result = computeDelta(m, 1, 0);
+//				width = Math.min(x - 10, T);
+//				if(width - 1 < 1)
+//					offset = 1;
+//				else
+//					offset = random.nextInt((int)(width - 1)) + 1;
+//				if(x + offset < this.width + 10)
+//					result = computeDelta(m, offset, 0);
 				break;
 			case 2:
 				y = point[m].pos.y;
-				height = Math.min(this.height + 10 - y,T);
-				if(height - 1 < 1)
-					offset = 1;
-				else
-					offset = random.nextInt((int)(height - 1)) + 1;
-				if(y + offset < this.height + 10)
-					result = computeDelta(m, 0, offset);
+				if(y < this.height + 9)
+					result = computeDelta(m, 0, 1);
+//				height = Math.min(this.height + 10 - y,T);
+//				if(height - 1 < 1)
+//					offset = 1;
+//				else
+//					offset = random.nextInt((int)(height - 1)) + 1;
+//				if(y + offset < this.height + 10)
+//					result = computeDelta(m, 0, offset);
 				break;
 			case 3:
 				x = point[m].pos.x;
-				width = Math.min(this.width + 10 - x, T);
-				if(width - 1 < 1)
-					offset = 1;
-				else
-					offset = random.nextInt((int)(width - 1)) + 1;
-				if(x - offset > 10)
-					result = computeDelta(m, -offset, 0);
+				if(x > 11)
+					result = computeDelta(m, -1, 0);
+//				width = Math.min(this.width + 10 - x, T);
+//				if(width - 1 < 1)
+//					offset = 1;
+//				else
+//					offset = random.nextInt((int)(width - 1)) + 1;
+//				if(x - offset > 10)
+//					result = computeDelta(m, -offset, 0);
 				break;
 			default:
 				break;
@@ -454,45 +520,45 @@ public class KK {
 	{
 		double EX = 0;
 		double EY = 0;
+		double E = 0;
 		for(int j = 0;j < num;j++)
 		{
 			if(m != j)
 			{
-				double v1 = 0;
+				double v1 = point[m].pos.x - point[j].pos.x;
 				if(offset_x != 0)
 				{
 					v1 = point[m].pos.x + offset_x - point[j].pos.x;
-					if(Math.abs(v1) < 0.1)
-						return 2;
 				}
-				double v2 = 0;
+				double v2 = point[m].pos.y - point[j].pos.y;
 				if(offset_y != 0)
 				{
 					v2 = point[m].pos.y + offset_y - point[j].pos.y;
-					if(Math.abs(v2) < 0.1)
-						return 2;
 				}
-
-				double v3 = l[m][j] * v1;
-				double v4 = l[m][j] * v2;
-				double v5 = Math.sqrt(v1*v1 + v2*v2);
-				EX += k[m][j]*(v1 - v3 / v5);
-				EY += k[m][j]*(v2 - v4 / v5);
+				double d = Math.sqrt(v1*v1 + v2*v2);
+				
+				E += 0.5 * k[m][j] * Math.pow(d - l[m][j], 2);				
+//				double v3 = l[m][j] * v1;
+//				double v4 = l[m][j] * v2;
+//				double v5 = Math.sqrt(v1*v1 + v2*v2);
+//				EX += k[m][j]*(v1 - v3 / v5);
+//				EY += k[m][j]*(v2 - v4 / v5);
 			}
 		}
-		double delt = Math.sqrt(EX * EX + EY * EY);
-		if(Double.isNaN(delt))
-			delt = 0;
-		if(delt < delta[m])
+//		double delt = Math.sqrt(EX * EX + EY * EY);
+//		if(Double.isNaN(delt))
+//			delt = 0;
+		if(E < this.E[m])
 		{
 			point[m].pos.x += offset_x;
 			point[m].pos.y += offset_y;
 
-			delta[m] = delt;
-			choose_delta = delta[m];
-			if(choose_delta < value)
+			this.E[m] = E;
+
+			if(E < value)
 				return 0;
-			else {
+			else
+			{
 				return 1;
 			}
 		}
