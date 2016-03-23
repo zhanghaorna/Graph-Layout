@@ -33,15 +33,15 @@ public class Main {
 		Graph graph = main.fileToGraph("graph50");		
 		KK kk = new KK(graph,400,400);
 		
-//		FR fr = new FR(graph, 400, 400);
-//		fr.initGraph();
-//		fr.infLayout();
+		FR fr = new FR(graph, 400, 400);
+		fr.initGraph();
+		fr.infLayout();
 		
 		GraphFrame frame = new GraphFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);	
-//		frame.setGraph(graph,200);
-		frame.setGraph(kk.graph,0);
+		frame.setGraph(graph,200);
+//		frame.setGraph(kk.graph,0);
 
 //		System.out.println("points:" + graph.points.size());
 //		FR fr = new FR(graph, 400, 400);

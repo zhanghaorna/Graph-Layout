@@ -259,27 +259,27 @@ public class KK {
 //					break;
 //			}
 //			System.out.println("vertex" + vertex);
-//			if(choose_delta > value)
-//				randomOffset(vertex);
-//			whole_count--;
+			if(choose_delta > value)
+				randomOffset(vertex);
+			whole_count--;
 			
 
 
-			int num = 0;
-			while(choose_delta > value)
-			{
-				computeE(vertex);
-				whole_count--;
-				if(!computeOffset(vertex))
-				{
-					break;
-				}
-				num++;
-				if(num > count)
-				{
-					break;
-				}
-			}
+//			int num = 0;
+//			while(choose_delta > value)
+//			{
+//				computeE(vertex);
+//				whole_count--;
+//				if(!computeOffset(vertex))
+//				{
+//					break;
+//				}
+//				num++;
+//				if(num > count)
+//				{
+//					break;
+//				}
+//			}
 			
 			set.remove(vertex);
 			if(whole_count < 0)
