@@ -82,8 +82,6 @@ public class FR {
 	{
 		for(int i = 0;i < count;i++)
 		{
-			
-
 			calculate();
 		}
 	}

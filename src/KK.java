@@ -53,16 +53,32 @@ public class KK {
 	//目前系统总能量
 	public double wholeE;
 	
+	//遗传算法 解数量
+	public int gene_count = 10;
+	public Point gene_point[][];
+	public Point temp[][];
+	public double gene_e[];
+	//交叉概率
+	public double cross = 0.75;
+	//变异概率
+	public double variance = 0.05;
+	//遗传最大迭代次数
+	public int gene_whole_count = 100;
+	
 	public KK(Graph graph,int width,int height)
 	{
 		this.graph = graph;
 		value = 1;
 		count = 20;
+		num = graph.points.size();
+		gene_point = new Point[graph.points.size()][gene_count];
+		temp = new Point[graph.points.size()][gene_count];
+		gene_e = new double[gene_count];
 		whole_count = count * graph.points.size() * 100;
 		set = new HashSet<Integer>();
 		this.width = width;
 		this.height = height;
-		num = graph.points.size();
+		
 		d = new int[num][num];
 		g = new int[num][num];
 		l = new double[num][num];
@@ -155,6 +171,148 @@ public class KK {
 //		System.out.println(whole_count);
 	}
 	
+	public void geneAlgorithm()
+	{
+		//初始化10个可行解
+		Random random = new Random();
+		for(int i = 0;i < gene_count;i++)
+		{
+			for(int j = 0;j < num;j++)
+			{
+				Point point = new Point(j);
+				point.pos.x = random.nextInt(width) + 10;
+				point.pos.y = random.nextInt(height) + 10;
+				gene_point[j][i] = point;
+			}
+		}
+		
+	}
+	
+	
+	//评估函数，计算能量，越小越好
+	public void fitness(Point point[][],int num)
+	{
+		double E = 0;
+		for(int i = 0;i < this.num;i++)
+		{
+			for(int j = 0;j < this.num;j++)
+			{
+				if(i != j)
+				{
+					double Xij = point[i][num].pos.x - point[j][num].pos.x;
+					double Yij = point[i][num].pos.y - point[j][num].pos.y;
+					double distance = Math.sqrt(Xij * Xij + Yij * Yij);
+					E += k[i][j] * 0.5 * Math.pow((distance - l[i][j]), 2);
+				}
+			}
+		}
+		this.gene_e[num] = 1/E;
+	}
+	
+	
+	
+	//选出两个个体使用交叉规则，在进行变异得出结果,总共产生gene_count个新生儿
+	public void gene_cal()
+	{
+		for(int k = 0;k < gene_count;k += 2)
+		{
+			int index[] = gene_selection();
+			Point point[][] = new Point[this.num][2];
+			for(int i = 0;i < this.num;i++)
+			{
+				Point pt1 = new Point(gene_point[i][index[0]]);
+				Point pt2 = new Point(gene_point[i][index[1]]);
+				point[i][0] = pt1;
+				point[i][1] = pt2;
+			}
+			Random random = new Random();
+			//进行交叉 
+			if(random.nextDouble() < cross)
+			{
+				//单点交叉
+				int val = random.nextInt(this.num);
+				double temp_x = this.gene_point[val][index[0]].pos.x;
+				double temp_y = this.gene_point[val][index[0]].pos.y;
+				this.gene_point[val][index[0]].pos.x = this.gene_point[val][index[1]].pos.x;
+				this.gene_point[val][index[0]].pos.y = this.gene_point[val][index[1]].pos.y;
+				this.gene_point[val][index[1]].pos.x = temp_x;
+				this.gene_point[val][index[1]].pos.x = temp_y;
+			}
+			//进行变异
+			if(random.nextDouble() < variance)
+			{
+				//取3个点坐标变异
+				for(int i = 0;i < this.num / 10.0;i++)
+				{
+					int val = random.nextInt(this.num);
+					int offset_x = random.nextInt(20) + 1;
+					if(random.nextDouble() < 0.5)
+						offset_x = -offset_x;
+					int offset_y = random.nextInt(20) + 1;
+					if(random.nextDouble() < 0.5)
+						offset_y = -offset_y;
+					this.gene_point[val][index[0]].pos.x += offset_x;
+					this.gene_point[val][index[0]].pos.y += offset_y;
+					this.gene_point[val][index[1]].pos.x += offset_x;
+					this.gene_point[val][index[1]].pos.y += offset_y;
+				}		
+			}
+			
+			
+		}
+
+		
+	}
+	
+	//轮转盘选出解
+	public int[] gene_selection()
+	{
+		double whole = 0;
+		for(int i = 0;i < gene_count;i++)
+		{
+			whole = this.gene_e[i];
+		}
+		for(int i = 0;i < gene_count;i++)
+		{
+			this.gene_e[i] = this.gene_e[i] / whole;
+		}
+		Random random = new Random();
+		int[] index = new int[2];
+		int first = -1;
+		int second = -1;
+		double val = random.nextDouble();
+		for(int i = 0;i < gene_count;i++)
+		{
+			val -= this.gene_e[i];
+			if(val < 0)
+			{
+				first = i;
+				break;
+			}
+		}
+		if(first == -1)
+			first = gene_count - 1;
+		
+		do {
+			val = random.nextDouble();
+			for(int i = 0;i < gene_count;i++)
+			{
+				val -= this.gene_e[i];
+				if(val < 0)
+				{
+					second = i;
+					break;
+				}
+			}
+			if(second == -1)
+				second = gene_count - 1;
+		} while (second != first);
+
+		index[0] = first;
+		index[1] = second;
+		return index;
+	}
+	
 	public void changeVertexPosition()
 	{
 		Random random = new Random();
@@ -225,67 +383,50 @@ public class KK {
 	{
 		while(true)
 		{
-			double maxDelta = -1;
-			double maxE = -1;
-			vertex = -1;
-			if(set.size() == 0)
-			{
-				for(int i = 0;i < num;i++)
-				{
-					set.add(i);
-				}
-			}
-			Iterator<Integer> iterator = set.iterator();
-			while(iterator.hasNext())
-			{
-				int num = iterator.next().intValue();
-//				if(delta[num] > maxDelta)
+//			double maxE = -1;
+//			vertex = -1;
+//			if(set.size() == 0)
+//			{
+//				for(int i = 0;i < num;i++)
 //				{
-//					maxDelta = delta[num];
+//					set.add(i);
+//				}
+//			}
+//			Iterator<Integer> iterator = set.iterator();
+//			while(iterator.hasNext())
+//			{
+//				int num = iterator.next().intValue();
+//				if(E[num] > maxE)
+//				{
+//					maxE = E[num];
 //					vertex = num;
 //				}
-				if(E[num] > maxE)
-				{
-					maxE = E[num];
-					vertex = num;
-				}
-			}
-			choose_delta = maxE;
-//			choose_delta = maxDelta;
-//			if(set.size() == num)
-//			{
-//				System.out.println(choose_delta);
-//				if(choose_delta < value)
-//					break;
 //			}
-//			System.out.println("vertex" + vertex);
-			if(choose_delta > value)
-				randomOffset(vertex);
-			whole_count--;
+//			choose_delta = maxE;
+//			if(choose_delta > value)
+//				randomOffset(vertex);
+//			whole_count--;
+////			int num = 0;
+////			while(choose_delta > value)
+////			{
+////				computeE(vertex);
+////				whole_count--;
+////				if(!computeOffset(vertex))
+////				{
+////					break;
+////				}
+////				num++;
+////				if(num > count)
+////				{
+////					break;
+////				}
+////			}	
+//			set.remove(vertex);
+//			if(whole_count < 0)
+//				return;
+			if(gene_whole_count < 0)
+				break;
 			
-
-
-//			int num = 0;
-//			while(choose_delta > value)
-//			{
-//				computeE(vertex);
-//				whole_count--;
-//				if(!computeOffset(vertex))
-//				{
-//					break;
-//				}
-//				num++;
-//				if(num > count)
-//				{
-//					break;
-//				}
-//			}
-			
-			set.remove(vertex);
-			if(whole_count < 0)
-				return;
-			
-//			computeDelta();
 		}
 	}
 	

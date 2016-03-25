@@ -24,6 +24,17 @@ public class Point {
 		this.num = num;
 	}
 	
+	public Point(Point point)
+	{
+		num = point.num;
+		pos = new Vector();
+		pos.x = point.pos.x;
+		pos.y = point.pos.y;
+		disp = new Vector();
+		disp.y = point.disp.x;
+		disp.y = point.disp.y;
+	}
+	
 	public Point()
 	{
 		pos = new Vector();
