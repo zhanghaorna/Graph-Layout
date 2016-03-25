@@ -54,7 +54,7 @@ public class KK {
 	public double wholeE;
 	
 	//遗传算法 解数量
-	public int gene_count = 10;
+	public int gene_count = 4;
 	public Point gene_point[][];
 	public Point temp[][];
 	public double gene_e[];
@@ -63,7 +63,7 @@ public class KK {
 	//变异概率
 	public double variance = 0.05;
 	//遗传最大迭代次数
-	public int gene_whole_count = 100;
+	public int gene_whole_count = 1000;
 	
 	public KK(Graph graph,int width,int height)
 	{
@@ -150,7 +150,7 @@ public class KK {
 			set.add(i);
 		}
 		
-		computeE();
+//		computeE();
 //		wholeE = computeE();
 		
 //		changeVertexPosition();
@@ -162,12 +162,12 @@ public class KK {
 		
 		System.out.println(end - start);
 		
-		for(int i = 0;i < graph.points.size();i++)
-		{
-			Point point = graph.points.get(i);
-			point.pos.x = this.point[point.num - 1].pos.x;
-			point.pos.y = this.point[point.num - 1].pos.y;
-		}
+//		for(int i = 0;i < graph.points.size();i++)
+//		{
+//			Point point = graph.points.get(i);
+//			point.pos.x = this.point[point.num - 1].pos.x;
+//			point.pos.y = this.point[point.num - 1].pos.y;
+//		}
 //		System.out.println(whole_count);
 	}
 	
@@ -184,8 +184,7 @@ public class KK {
 				point.pos.y = random.nextInt(height) + 10;
 				gene_point[j][i] = point;
 			}
-		}
-		
+		}	
 	}
 	
 	
@@ -231,12 +230,12 @@ public class KK {
 			{
 				//单点交叉
 				int val = random.nextInt(this.num);
-				double temp_x = this.gene_point[val][index[0]].pos.x;
-				double temp_y = this.gene_point[val][index[0]].pos.y;
-				this.gene_point[val][index[0]].pos.x = this.gene_point[val][index[1]].pos.x;
-				this.gene_point[val][index[0]].pos.y = this.gene_point[val][index[1]].pos.y;
-				this.gene_point[val][index[1]].pos.x = temp_x;
-				this.gene_point[val][index[1]].pos.x = temp_y;
+				double temp_x = point[val][0].pos.x;
+				double temp_y = point[val][0].pos.y;
+				point[val][0].pos.x = point[val][1].pos.x;
+				point[val][0].pos.y = point[val][1].pos.y;
+				point[val][1].pos.x = temp_x;
+				point[val][1].pos.x = temp_y;
 			}
 			//进行变异
 			if(random.nextDouble() < variance)
@@ -251,17 +250,19 @@ public class KK {
 					int offset_y = random.nextInt(20) + 1;
 					if(random.nextDouble() < 0.5)
 						offset_y = -offset_y;
-					this.gene_point[val][index[0]].pos.x += offset_x;
-					this.gene_point[val][index[0]].pos.y += offset_y;
-					this.gene_point[val][index[1]].pos.x += offset_x;
-					this.gene_point[val][index[1]].pos.y += offset_y;
+					point[val][0].pos.x += offset_x;
+					point[val][0].pos.y += offset_y;
+					point[val][1].pos.x += offset_x;
+					point[val][1].pos.y += offset_y;
 				}		
 			}
-			
-			
+			for(int i = 0;i < this.num;i++)
+			{
+				temp[i][k] = point[i][0];
+				temp[i][k + 1] = point[i][1];
+			}
 		}
-
-		
+		gene_point = temp;
 	}
 	
 	//轮转盘选出解
@@ -270,7 +271,7 @@ public class KK {
 		double whole = 0;
 		for(int i = 0;i < gene_count;i++)
 		{
-			whole = this.gene_e[i];
+			whole += this.gene_e[i];
 		}
 		for(int i = 0;i < gene_count;i++)
 		{
@@ -306,7 +307,7 @@ public class KK {
 			}
 			if(second == -1)
 				second = gene_count - 1;
-		} while (second != first);
+		} while (second == first);
 
 		index[0] = first;
 		index[1] = second;
@@ -381,6 +382,9 @@ public class KK {
 	
 	public void layout()
 	{
+		geneAlgorithm();
+		for(int i = 0;i < this.gene_count;i++)
+			fitness(this.gene_point, i);
 		while(true)
 		{
 //			double maxE = -1;
@@ -426,7 +430,26 @@ public class KK {
 //				return;
 			if(gene_whole_count < 0)
 				break;
-			
+			gene_cal();
+			for(int i = 0;i < this.gene_count;i++)
+				fitness(this.gene_point, i);
+			gene_whole_count--;
+		}
+		for(int i = 0;i < this.gene_count;i++)
+			fitness(this.gene_point, i);
+		double maxE = 0;
+		int max = 0;
+		for(int i = 0;i < gene_count;i++)
+			if(gene_e[i] > maxE)
+			{
+				max = i;
+				maxE = gene_e[i];
+			}
+		for(int i = 0;i < graph.points.size();i++)
+		{
+			Point point = graph.points.get(i);
+			point.pos.x = this.gene_point[i][max].pos.x;
+			point.pos.y = this.gene_point[i][max].pos.y;
 		}
 	}
 	
