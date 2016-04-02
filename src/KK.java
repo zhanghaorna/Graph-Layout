@@ -130,8 +130,12 @@ public class KK {
 		for(int i = 0;i < num;i++)
 		{
 			Point point = new Point(i);
-			point.pos.x = random.nextInt(width) + 10;
-			point.pos.y = random.nextInt(height) + 10;
+			point.pos.x = random.nextInt(width / 2);
+			if(random.nextDouble() < 0.5)
+				point.pos.x = -point.pos.x;
+			point.pos.y = random.nextInt(height / 2);
+			if(random.nextDouble() < 0.5)
+				point.pos.y = -point.pos.y;
 			this.point[i] = point;
 			set.add(i);
 		}
@@ -392,7 +396,7 @@ public class KK {
 			switch (or) {
 			case 0:
 				y = point[m].pos.y;
-				if(y > 201)
+				if(y > -this.height / 2)
 					result = computeDelta(m, 0, -1);
 //				height = Math.min(y - 10,T);
 //				if(height - 1 < 1)
@@ -405,7 +409,7 @@ public class KK {
 				break;
 			case 1:
 				x = point[m].pos.x;
-				if(x < this.width + 199)
+				if(x < this.width/2)
 					result = computeDelta(m, 1, 0);
 //				width = Math.min(x - 10, T);
 //				if(width - 1 < 1)
@@ -417,7 +421,7 @@ public class KK {
 				break;
 			case 2:
 				y = point[m].pos.y;
-				if(y < this.height + 199)
+				if(y < this.height/2)
 					result = computeDelta(m, 0, 1);
 //				height = Math.min(this.height + 10 - y,T);
 //				if(height - 1 < 1)
@@ -429,7 +433,7 @@ public class KK {
 				break;
 			case 3:
 				x = point[m].pos.x;
-				if(x > 201)
+				if(x > -this.width/2)
 					result = computeDelta(m, -1, 0);
 //				width = Math.min(this.width + 10 - x, T);
 //				if(width - 1 < 1)

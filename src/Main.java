@@ -37,18 +37,20 @@ public class Main {
 		List<Graph> graphs = main.fileToGraphs("graph");
 		Graph graph = main.numToGraph(graphs.size());
 		System.out.println(graphs.size());
-		KK kk = new KK(graph,400,400,200,200);
+		KK kk = new KK(graph,400,400,300,300);
 		double length = main.graphEdgeLength(graph);
 		
 		GraphFrame frame = new GraphFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);	
 //		frame.setGraph(graph,200);
-		frame.setGraph(kk.graph,0);
+//		frame.setGraph(kk.graph,0);
 		
 		for(int i = 0;i < graphs.size();i++)
 		{
-			KK kk1 = new KK(graphs.get(i),)
+			KK kk1 = new KK(graphs.get(i),(int)length,(int)length,graph.points.get(i).pos.x,
+					graph.points.get(i).pos.y);
+			frame.setGraph(kk1.graph, 0);
 		}
 		
 		
