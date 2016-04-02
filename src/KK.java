@@ -53,29 +53,13 @@ public class KK {
 	//目前系统总能量
 	public double wholeE;
 	
-	//遗传算法 解数量
-	public int gene_count = 10;
-	public Point gene_point[];
-	public Point temp[];
-	public double gene_e[];
-	public double gene_e_[];
-	//交叉概率
-	public double cross = 0.75;
-	//变异概率
-	public double variance = 0.05;
-	//遗传最大迭代次数
-	public int gene_whole_count = 10000;
 	
-	public KK(Graph graph,int width,int height)
+	public KK(Graph graph,int width,int height,double x_offset,double y_offset)
 	{
 		this.graph = graph;
 		value = 1;
 		count = 20;
 		num = graph.points.size();
-		gene_point = new Point[gene_count];
-		temp = new Point[gene_count];
-		gene_e = new double[gene_count];
-		gene_e_ = new double[gene_count];
 		whole_count = count * graph.points.size() * 100;
 		set = new HashSet<Integer>();
 		this.width = width;
@@ -128,7 +112,7 @@ public class KK {
 				if(d[i][j] != Integer.MAX_VALUE&&d[i][j] > maxD)
 					maxD = d[i][j];
 			}
-		double L = ((double)width) / 10;
+		double L = ((double)width) / maxD;
 
 		//计算节点间的弹簧力
 		double K = maxD * maxD;
@@ -152,195 +136,25 @@ public class KK {
 			set.add(i);
 		}
 		
-//		computeE();
+		computeE();
 
 		long start = System.currentTimeMillis();
-//		layout();
-		genelayout();
+		layout();
 		long end = System.currentTimeMillis();
 		
 		System.out.println(end - start);
 		
-//		for(int i = 0;i < graph.points.size();i++)
-//		{
-//			Point point = graph.points.get(i);
-//			point.pos.x = this.point[point.num - 1].pos.x;
-//			point.pos.y = this.point[point.num - 1].pos.y;
-//		}
+		for(int i = 0;i < graph.points.size();i++)
+		{
+			Point point = graph.points.get(i);
+			point.pos.x = this.point[point.num - 1].pos.x + x_offset;
+			point.pos.y = this.point[point.num - 1].pos.y + y_offset;
+		}
 //		computeWholeE();
 //		System.out.println(whole_count);
 	}
 	
-	public void geneAlgorithm(int num)
-	{
-		//初始化可行解
-		Random random = new Random();
-		Point point = new Point();
-		point.pos.x = this.point[num].pos.x;
-		point.pos.y = this.point[num].pos.y;
-		gene_point[0] = point;
-		for(int j = 1;j < gene_count;j++)
-		{
-			point = new Point(j);
-			point.pos.x = random.nextInt(width) + 10;
-			point.pos.y = random.nextInt(height) + 10;
-			gene_point[j] = point;
-		}
-	}
-	
-	
-	//评估函数，计算能量，越小越好
-	public void fitness(int num)
-	{
-		double E = 0;
-		for(int i = 0;i < this.num;i++)
-		{
-			for(int j = i + 1;j < this.num;j++)
-			{
-				if(i != j)
-				{
-					double Xij = point[i][num].pos.x - point[j][num].pos.x;
-					double Yij = point[i][num].pos.y - point[j][num].pos.y;
-					double distance = Math.sqrt(Xij * Xij + Yij * Yij);
-					E += k[i][j] * 0.5 * Math.pow((distance - l[i][j]), 2);
-				}
-			}
-		}
-		this.gene_e_[num] = E;
-		this.gene_e[num] = 1/E;
-	}
-	
-	
-	
-	//选出两个个体使用交叉规则，在进行变异得出结果,总共产生gene_count个新生儿
-	public void gene_cal()
-	{
-//		System.out.println("当前各点的能量值为：" + this.gene_e_[0] + " " + this.gene_e_[1]
-//				+ " " + this.gene_e_[2] + " " + this.gene_e_[3]);
-		double whole_e = 0;
-		for(int i = 0;i < this.gene_count;i++)
-			whole_e += this.gene_e_[i];
-		System.out.println("系统平均能量为：" + whole_e/4);
-		for(int k = 0;k < gene_count;k += 2)
-		{
-			int index[] = gene_selection();
-//			System.out.println("取出的节点为" + index[0] + " " + index[1]);
-			Point point[][] = new Point[this.num][2];
-			for(int i = 0;i < this.num;i++)
-			{
-				Point pt1 = new Point(gene_point[i][index[0]]);
-				Point pt2 = new Point(gene_point[i][index[1]]);
-				point[i][0] = pt1;
-				point[i][1] = pt2;
-			}
-			Random random = new Random();
-			//进行交叉 
-			if(random.nextDouble() < cross)
-			{
-				//单点交叉
-				int val = random.nextInt(this.num);
-				for(int i = val;i < this.num;i++)
-				{
-					double temp_x = point[i][0].pos.x;
-					double temp_y = point[i][0].pos.y;
-					point[i][0].pos.x = point[i][1].pos.x;
-					point[i][0].pos.y = point[i][1].pos.y;
-					point[i][1].pos.x = temp_x;
-					point[i][1].pos.x = temp_y;
-				}
-			}
-			//进行变异
-			if(random.nextDouble() < variance)
-			{
-				//取3个点坐标变异
-				for(int i = 0;i < this.num / 3;i++)
-				{
-					int val = random.nextInt(this.num);
-					int offset_x = random.nextInt(20) + 1;
-					if(random.nextDouble() < 0.5)
-						offset_x = -offset_x;
-					int offset_y = random.nextInt(20) + 1;
-					if(random.nextDouble() < 0.5)
-						offset_y = -offset_y;
-					point[val][0].pos.x += offset_x;
-					point[val][0].pos.x = Math.max(Math.min(point[val][0].pos.x, width + 10), 10);
-					point[val][0].pos.y += offset_y;
-					point[val][0].pos.y = Math.max(Math.min(point[val][0].pos.y, height + 10), 10);
-					point[val][1].pos.x += offset_x;
-					point[val][1].pos.x = Math.max(Math.min(point[val][1].pos.x, width + 10), 10);
-					point[val][1].pos.y += offset_y;
-					point[val][1].pos.x = Math.max(Math.min(point[val][1].pos.x, height + 10), 10);
-				}		
-			}
-			for(int i = 0;i < this.num;i++)
-			{
-				temp[i][k] = point[i][0];
-				temp[i][k + 1] = point[i][1];
-			}
-		}
-		gene_point = temp;
-	}
-	
-	//轮转盘选出解
-	public int[] gene_selection()
-	{
-		double whole = 0;
-		for(int i = 0;i < gene_count;i++)
-		{
-			whole += this.gene_e[i];
-		}
-		for(int i = 0;i < gene_count;i++)
-		{
-			this.gene_e[i] = this.gene_e[i] / whole;
-		}
-		Random random = new Random();
-		int[] index = new int[2];
-		int first = -1;
-		int second = -1;
-		double val = random.nextDouble();
-		for(int i = 0;i < gene_count;i++)
-		{
-			val -= this.gene_e[i];
-			if(val < 0)
-			{
-				first = i;
-				break;
-			}
-		}
-		if(first == -1)
-			first = gene_count - 1;
-		
-		do {
-			val = random.nextDouble();
-			for(int i = 0;i < gene_count;i++)
-			{
-				val -= this.gene_e[i];
-				if(val < 0)
-				{
-					second = i;
-					break;
-				}
-			}
-			if(second == -1)
-				second = gene_count - 1;
-		} while (second == first);
 
-		index[0] = first;
-		index[1] = second;
-		return index;
-	}
-	
-	public void genelayout()
-	{
-		do 
-		{
-			for(int i = 0;i < this.num;i++)
-			{
-				geneAlgorithm(i);
-			}
-		} while (whole_count > 0);
-	}
-	
 	
 	public void layout()
 	{
@@ -369,21 +183,31 @@ public class KK {
 			if(choose_delta > value)
 				randomOffset(vertex);
 			whole_count--;
-////			int num = 0;
-////			while(choose_delta > value)
-////			{
-////				computeE(vertex);
-////				whole_count--;
-////				if(!computeOffset(vertex))
-////				{
-////					break;
-////				}
-////				num++;
-////				if(num > count)
-////				{
-////					break;
-////				}
-////			}	
+			
+//			for(int i = 0;i < graph.points.size();i++)
+//			{
+//				randomOffset(i);
+//				whole_count--;
+//			}
+			
+			
+			
+//			int num = 0;
+//			while(choose_delta > value)
+//			{
+//				computeE(vertex);
+//				whole_count--;
+//				if(!computeOffset(vertex))
+//				{
+//					break;
+//				}
+//				num++;
+//				if(num > count)
+//				{
+//					break;
+//				}
+//			}	
+			
 			set.remove(vertex);
 			if(whole_count < 0)
 				return;
@@ -568,7 +392,7 @@ public class KK {
 			switch (or) {
 			case 0:
 				y = point[m].pos.y;
-				if(y > 11)
+				if(y > 201)
 					result = computeDelta(m, 0, -1);
 //				height = Math.min(y - 10,T);
 //				if(height - 1 < 1)
@@ -581,7 +405,7 @@ public class KK {
 				break;
 			case 1:
 				x = point[m].pos.x;
-				if(x < this.width + 9)
+				if(x < this.width + 199)
 					result = computeDelta(m, 1, 0);
 //				width = Math.min(x - 10, T);
 //				if(width - 1 < 1)
@@ -593,7 +417,7 @@ public class KK {
 				break;
 			case 2:
 				y = point[m].pos.y;
-				if(y < this.height + 9)
+				if(y < this.height + 199)
 					result = computeDelta(m, 0, 1);
 //				height = Math.min(this.height + 10 - y,T);
 //				if(height - 1 < 1)
@@ -605,7 +429,7 @@ public class KK {
 				break;
 			case 3:
 				x = point[m].pos.x;
-				if(x > 11)
+				if(x > 201)
 					result = computeDelta(m, -1, 0);
 //				width = Math.min(this.width + 10 - x, T);
 //				if(width - 1 < 1)
@@ -625,7 +449,7 @@ public class KK {
 			else if(result == 1)
 			{
 				T = T * 0.9;
-				count = 10;
+				count = 4;
 			}
 			else 
 			{
@@ -640,8 +464,6 @@ public class KK {
 	//0表示已比设置的阈值小，1表示原来的delta大，2就表示比原来的delta大
 	public int computeDelta(int m ,int offset_x,int offset_y)
 	{
-		double EX = 0;
-		double EY = 0;
 		double E = 0;
 		for(int j = 0;j < num;j++)
 		{
@@ -660,16 +482,8 @@ public class KK {
 				double d = Math.sqrt(v1*v1 + v2*v2);
 				
 				E += 0.5 * k[m][j] * Math.pow(d - l[m][j], 2);				
-//				double v3 = l[m][j] * v1;
-//				double v4 = l[m][j] * v2;
-//				double v5 = Math.sqrt(v1*v1 + v2*v2);
-//				EX += k[m][j]*(v1 - v3 / v5);
-//				EY += k[m][j]*(v2 - v4 / v5);
 			}
 		}
-//		double delt = Math.sqrt(EX * EX + EY * EY);
-//		if(Double.isNaN(delt))
-//			delt = 0;
 		if(E < this.E[m])
 		{
 			point[m].pos.x += offset_x;

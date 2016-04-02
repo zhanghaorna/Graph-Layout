@@ -31,7 +31,7 @@ public class FR {
 		this.graph = graph;
 		this.width = width;
 		this.height = height;
-		k = Math.sqrt(width * height / graph.points.size());
+		k = Math.sqrt(width * height / graph.points.size()) / 5;
 		System.out.println("best distance:" + k);
 		t = width / 10;
 //		offsetValue = graph.points.size() * 0.01 * k;
@@ -88,6 +88,7 @@ public class FR {
 	
 	public void infLayout()
 	{
+		long start = System.currentTimeMillis();
 		for(;;)
 		{
 			if(offset < offsetValue)
@@ -99,6 +100,8 @@ public class FR {
 //			pre_offset = offset;
 			calculate();
 		}
+		long end = System.currentTimeMillis();
+		System.out.println(end - start);
 	}
 	
 	//每次迭代的工作
@@ -155,7 +158,7 @@ public class FR {
 			offset += vector.length();
 		}
 		
-		System.out.println("节点移动量" + offset  + " 当前温度:" + t);
+//		System.out.println("节点移动量" + offset  + " 当前温度:" + t);
 //		if(offset < pre_offset)
 //		if(t > 1)
 		t = 0.95 * t;	
