@@ -31,7 +31,7 @@ public class FR {
 		this.graph = graph;
 		this.width = width;
 		this.height = height;
-		k = Math.sqrt(width * height / graph.points.size()) / 5;
+		k = Math.sqrt(width * height / graph.points.size()) / 2;
 		System.out.println("best distance:" + k);
 		t = width / 10;
 //		offsetValue = graph.points.size() * 0.01 * k;

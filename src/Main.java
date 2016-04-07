@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
 
@@ -34,11 +35,12 @@ public class Main {
 
 		Main main = new Main();
 //		Graph graph = main.fileToGraph("graph");
-		List<Graph> graphs = main.fileToGraphs("graph");
-		Graph graph = main.numToGraph(graphs.size());
-		System.out.println(graphs.size());
-		KK kk = new KK(graph,400,400,300,300);
-		double length = main.graphEdgeLength(graph);
+		List<Graph> graphs = main.fileToGraphs("graph3");
+		
+//		Graph graph = main.numToGraph(graphs.size());
+//		System.out.println(graphs.size());
+		KK kk = new KK(graphs.get(0),400,400,300,300);
+//		double length = main.graphEdgeLength(graph) * 0.6;
 		
 		GraphFrame frame = new GraphFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -46,19 +48,19 @@ public class Main {
 //		frame.setGraph(graph,200);
 //		frame.setGraph(kk.graph,0);
 		
-		for(int i = 0;i < graphs.size();i++)
-		{
-			KK kk1 = new KK(graphs.get(i),(int)length,(int)length,graph.points.get(i).pos.x,
-					graph.points.get(i).pos.y);
-			frame.setGraph(kk1.graph, 0);
-		}
+//		for(int i = 0;i < graphs.size();i++)
+//		{
+//			KK kk1 = new KK(graphs.get(i),(int)length,(int)length,graph.points.get(i).pos.x,
+//					graph.points.get(i).pos.y);
+//			frame.setGraph(kk1.graph, 0);
+//		}
+//		
 		
 		
-		
-//		FR fr = new FR(graph, 400, 400);
+//		FR fr = new FR(graphs.get(0), 400, 400);
 //		fr.initGraph();
 //		fr.infLayout();
-		
+//		fr.initLayout(45);
 
 
 //		System.out.println("points:" + graph.points.size());
@@ -74,20 +76,24 @@ public class Main {
 //		fr.initGraph();
 ////		fr.initLayout(300);
 ////		fr.infLayout();
-//		frame.setGraph(graph);
 		
-//		for(int i = 0;i < 200;i++)
+		frame.setGraph(kk.graph,0);
+		
+//		Scanner scanner = new Scanner(System.in);
+//		
+//		for(int i = 1;i < 45;i++)
 //		{
+//			frame.setGraph(graphs.get(0),200);
 //			fr.calculate();
-//			frame.setGraph(graph);
-//			
-//			try 
-//			{
-//				Thread.sleep(500);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+//			System.out.println(i);
+//			scanner.next();
+////			try 
+////			{
+////				Thread.sleep(500);
+////			} catch (InterruptedException e) {
+////				// TODO Auto-generated catch block
+////				e.printStackTrace();
+////			}
 //		}
 		
 			
